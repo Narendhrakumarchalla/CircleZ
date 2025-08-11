@@ -1,12 +1,15 @@
 import imagekit from "../config/imagekit.js";
 import Connection from "../models/connectionModel.js";
+import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import {inngest} from "../inngest/index.js";
 import fs from 'fs';
 
 // Get user data
 const getUserData = async (req, res) => {
     try {
         const {userId} = req.auth();
+        console.log(userId);
         
         const user = await User.findById(userId);
         if(!user){
@@ -259,6 +262,11 @@ const requestConnection = async (req, res) => {
                 to_user_id: id
             });
 
+            await inngest.send({
+                name: 'app/connection-request',
+                data: {connectionId: newConnection._id}
+            })
+
             return res.status(200).json({
                 success: true,
                 message: "Connection request sent successfully",
@@ -368,5 +376,35 @@ const acceptConnection = async (req, res) => {
     }
 }    
 
+//getUserProfiles
+const getUserProfiles = async (req, res) => {
+    try {
+        const {profileId} = req.body;
 
-export { getUserData, updateUserData, discoverUsers, followUser, unFollowUser, requestConnection, getUserConnections, acceptConnection };
+        const profile = await User.findById(profileId);
+        if(!profile){
+            return res.status(404).json({
+                success: false,
+                message: "Profile not found"
+            })
+        }
+
+        const posts = await Post.find({user:profileId}).populate('user')
+        res.status(200).json({
+            success: true,
+            profile,
+            posts
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+        
+    }
+}
+
+
+export { getUserData, updateUserData, discoverUsers, followUser, unFollowUser, requestConnection, getUserConnections, acceptConnection, getUserProfiles };

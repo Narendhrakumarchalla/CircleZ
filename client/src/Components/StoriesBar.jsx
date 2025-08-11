@@ -5,17 +5,32 @@ import Loading from './Loading'
 import moment from 'moment'
 import StoryModel from './StoryModel'
 import StoryViewer from './StoryViewer'
+import { useAuth } from '@clerk/clerk-react'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 
 const StoriesBar = () => {
     const [stories, setStories] = useState([])
     const [loading, setLoading] = useState(true)
     const [showModal, setShowModal] = useState(false)
     const [viewStory, setViewStory] = useState(null)
-
+    const {getToken} = useAuth();
 
     const fetchStories = async () => {
-        setStories(dummyStoriesData);
-        setLoading(false)
+        try {
+            const token = await getToken();
+            const {data} = await api.get('/api/story/get', {
+                headers:{Authorization : `Bearer ${token}`}
+            })
+            if(data.success){
+                setStories(data.stories)
+            }
+            else{
+                toast(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     useEffect(()=>{

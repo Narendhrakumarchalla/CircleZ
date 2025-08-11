@@ -2,6 +2,8 @@ import { Inngest } from "inngest";
 import User from "../models/userModel.js";
 import Connection from "../models/connectionModel.js";
 import sendEmail from "../config/nodemailer.js";
+import Story from "../models/storyModel.js";
+import Message from "../models/messageModel.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "CircleZ" });
@@ -93,7 +95,7 @@ const sendConnectionRequestReminder = inngest.createFunction(
         })
 
         const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await step.sleepUntil(in24Hours);
+        await step.sleepUntil('wait-for-24hours',in24Hours);
         
 
         await step.run('send-connection-request-reminder', async () => {
@@ -128,11 +130,68 @@ const sendConnectionRequestReminder = inngest.createFunction(
     }
 )
 
+// inngest function to delete a story after 24 hours
+const deleteStoryAfter24Hours = inngest.createFunction(
+    {id: 'strory-delete'},
+    {event: 'app/story.delete'},
+
+    async ({event, step}) => {
+        const {storyId} = event.data;
+        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await step.sleepUntil('wait-for-24hours', in24Hours);
+        // Logic to delete the story
+        await step.run('delete-story', async () => {
+            await Story.findByIdAndDelete(storyId);
+            return {message: 'Story deleted successfully after 24 hours.'};
+        })
+    }
+)
+
+//create a function to send reminder of unseen messages
+
+const sendUnseenMessageReminder = inngest.createFunction(
+    {id: 'send-unseen-message-reminder'},
+    {cron: '0 9 * * *'}, // Every day at 9 AM
+
+    async ({step}) => {
+        const messages = await Message.find({seen: false}).populate("to_user_id");
+        let unseenMessages = {}
+
+        messages.map((message) => {
+            unseenMessages[messages.to_user_id._id]= (unseenMessages[messages.to_user_id._id] || 0) + 1;
+        })
+
+        for(const userId in unseenMessages){
+            const user = await User.findById(userId)
+
+            const subject = `You have ${unseenMessages[userId]} unseen messages`
+            body = `
+                <div style="background-color: #f3f4f6; padding: 20px; font-family: Arial, sans-serif;">
+                    <h2>Hi ${user.full_name},</h2>
+                    <p>You have ${unseenMessages[userId]} unseen messages.</p>
+                    <p>Click <a href="${process.env.FRONTEND_URL}/messages" style= "color : #10b981;">here,</a> to view them.</p>
+                    <br/>
+                    <p>Best regards,</p><br/>
+                    <p>The <b>CircleZ</b> Team</p>
+                </div>
+            `
+
+            await sendEmail({
+                to:user.email,
+                subject,
+                body
+            })
+        }
+        return {message: 'Notification sent.'}
+    }
+)
 
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
     syncUserCreation,
     syncUserUpdation,
     syncUserDeletion,
-    sendConnectionRequestReminder
+    sendConnectionRequestReminder,
+    deleteStoryAfter24Hours,
+    sendUnseenMessageReminder
 ];

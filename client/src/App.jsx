@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Login from './Pages/Login'
 import Profile from './Pages/Profile'
@@ -7,12 +7,31 @@ import Discover from './Pages/Discover'
 import Connections from './Pages/Connections'
 import CreatePost from './Pages/CreatePost'
 import Feed from './Pages/Feed'
-import {useUser} from '@clerk/clerk-react'
+import {useAuth, useUser} from '@clerk/clerk-react'
 import Layout from './Pages/Layout'
 import {Toaster} from 'react-hot-toast'
 import Chat from './Pages/Chat'
+import {useDispatch} from 'react-redux'
+import { fetchUser } from './featutes/user/userSlice'
+
 const App = () => {
   const {user} = useUser();
+  const {getToken} = useAuth()
+
+  const dispatch = useDispatch()
+
+  useEffect(()=>{
+    const fetchData = async () => {
+      if(user){
+        const token = await getToken()
+        dispatch(fetchUser(token))
+      }
+    }
+
+    fetchData()
+  },[user, getToken, dispatch])
+
+
   return (
     <div>
         <Toaster />

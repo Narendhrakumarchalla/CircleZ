@@ -4,10 +4,11 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../Components/Sidebar';
 import { dummyUserData } from '../assets/assets';
 import Loading from '../Components/Loading';
+import { useSelector } from 'react-redux';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const user = dummyUserData;
+  const user = useSelector((state)=> state.user.value);
 
   return user ? (
     <div className="flex w-full h-screen relative overflow-hidden">
