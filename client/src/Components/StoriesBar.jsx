@@ -40,7 +40,7 @@ const StoriesBar = () => {
     console.log(stories);
     
 
-  return !loading ? (
+  return (
     <div className='w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl overflow-x-auto px-4'>
         <div className='flex gap-2 pb-5'>
             <div 
@@ -69,7 +69,7 @@ const StoriesBar = () => {
                             story.media_type !== "text" && (
                                 <div className='absolute inset-0 z-1 rounded-lg bg-black overflow-hidden'>
                                    {
-                                        stories.media_type === "image" ?
+                                        story.media_type === "image" ?
                                         <img src={story.media_url} 
                                         className='h-full w-full object-cover hover:scale-110 transition duration-500 opacity-70 hover:opacity-80' />
                                         :
@@ -93,7 +93,7 @@ const StoriesBar = () => {
         }
 
     </div>
-  ) : <Loading />
+  )
 }
 
 export default StoriesBar

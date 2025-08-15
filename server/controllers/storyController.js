@@ -10,7 +10,7 @@ const addStory = async (req, res) => {
         const {content, media_type, background_color} = req.body;
         let media_url = '';
 
-        const media = req.files 
+        const media = req.file; 
         if(media_type === 'image' || media_type === 'video') {
             const buffer = fs.readFileSync(media.path);
             const response = await imagekit.upload({
@@ -53,7 +53,7 @@ const getStories = async (req, res) => {
         const user = await User.findById(userId).populate('connections following');
         const userIds = [userId, ...user.connections, ...user.following]
 
-        const stories = await Story.find({user:{$in:userId}}).populate('user').sort({ createdAt: -1 });
+        const stories = await Story.find({user:{$in:userIds}}).populate('user').sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, stories });
 

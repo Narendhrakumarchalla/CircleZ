@@ -1,6 +1,7 @@
 import fs from 'fs';
 import imagekit from '../config/imagekit.js';
 import Post from '../models/postModel.js';
+import User from '../models/userModel.js';
 
 const addPost = async (req, res) => {
     try {
@@ -59,7 +60,7 @@ const getFeedPosts = async (req, res) => {
 
         const userIds = [userId, ...user.connections, ...user.following];
 
-        const posts = (await Post.find({user: {$in: userIds}}).populate('user')).sort({createdAt: -1});
+        const posts = await Post.find({user: {$in: userIds}}).populate('user').sort({createdAt: -1});
         res.status(200).json({success: true, posts});
 
     } catch (error) {

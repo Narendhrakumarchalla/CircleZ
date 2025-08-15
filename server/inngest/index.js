@@ -16,7 +16,7 @@ const syncUserCreation = inngest.createFunction(
         const {first_name, last_name, email_addresses, image_url, id} = event.data;
         let username = email_addresses[0].email_address.split('@')[0];
 
-        const user = User.findOne({username});
+        const user = await User.findOne({username});
         if(user){
             username = username + Math.floor(Math.random() * 10000);
         }
@@ -132,7 +132,7 @@ const sendConnectionRequestReminder = inngest.createFunction(
 
 // inngest function to delete a story after 24 hours
 const deleteStoryAfter24Hours = inngest.createFunction(
-    {id: 'strory-delete'},
+    {id: 'story-delete'},
     {event: 'app/story.delete'},
 
     async ({event, step}) => {
@@ -158,14 +158,14 @@ const sendUnseenMessageReminder = inngest.createFunction(
         let unseenMessages = {}
 
         messages.map((message) => {
-            unseenMessages[messages.to_user_id._id]= (unseenMessages[messages.to_user_id._id] || 0) + 1;
+            unseenMessages[message.to_user_id._id]= (unseenMessages[message.to_user_id._id] || 0) + 1;
         })
 
         for(const userId in unseenMessages){
             const user = await User.findById(userId)
 
             const subject = `You have ${unseenMessages[userId]} unseen messages`
-            body = `
+            const body = `
                 <div style="background-color: #f3f4f6; padding: 20px; font-family: Arial, sans-serif;">
                     <h2>Hi ${user.full_name},</h2>
                     <p>You have ${unseenMessages[userId]} unseen messages.</p>

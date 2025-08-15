@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Sparkle, TextIcon, Upload } from 'lucide-react';
 import React, { useState } from 'react'
 import {toast} from 'react-hot-toast'
+import api from '../api/axios';
 
 const StoryModel = ({setShowModal, fetchStories}) => {
 
@@ -58,7 +59,7 @@ const StoryModel = ({setShowModal, fetchStories}) => {
             throw new Error("Please enter some text")
         }
 
-        let formData = new formData();
+        let formData = new FormData();
         formData.append('content', text)
         formData.append('media_type', media_type)
         formData.append('media', media)

@@ -5,11 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from '../featutes/user/userSlice';
 import { useAuth } from '@clerk/clerk-react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+
 
 const ProfileModal = ({setShowEdit}) => {
     const user = useSelector((state) => state.user.value);
     const dispatch = useDispatch()
     const {getToken} = useAuth()
+    const navigate = useNavigate()
 
     const [editForm, setEditForm] = useState({
         username: user.username,
@@ -35,6 +38,7 @@ const ProfileModal = ({setShowEdit}) => {
 
             const token = await getToken()
             dispatch(updateUser({userData, token}))
+            navigate('/profile')
         } catch (error) {
             toast.error(error.message)
         }

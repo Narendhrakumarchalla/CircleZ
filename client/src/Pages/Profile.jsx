@@ -18,23 +18,23 @@ const Profile = () => {
   const [posts, setPosts]= useState([])
   const [activeTab, setActiveTab] = useState('posts')
   const [showEdit, setShowEdit] = useState(false)
-  const getToken = useAuth()
+  const {getToken} = useAuth()
 
   const fetchUser = async(profileId)=>{
     const token = await getToken()
     try {
       const {data} = await api.post('/api/user/profiles', {profileId}, {
-        headers : {Autherization: `Bearer ${token}`}
+        headers : {Authorization: `Bearer ${token}`}
       })
       if(data.success){
         setUser(data.profile)
-        setPosts(data.message)
+        setPosts(data.posts)
       }
       else{
         toast.error(data.message)
       }
     } catch (error) {
-      toast.error(data.message)
+      toast.error(error.message)
     }
   }
 
@@ -46,7 +46,7 @@ const Profile = () => {
     }
   },[profileId, currentUser])
 
-  
+
   return user ? (
     <div className='relative h-full overflow-y-scroll bg-gray-50 p-6'>
       <div className='max-w-3xl mx-auto'>

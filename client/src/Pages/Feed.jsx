@@ -5,6 +5,7 @@ import PostCard from '../Components/PostCard'
 import RecentMessages from '../Components/RecentMessages'
 import { useAuth } from '@clerk/clerk-react'
 import api from '../api/axios'
+import toast from 'react-hot-toast'
 
 const Feed = () => {
   const [feeds, setFeeds] = useState([])
@@ -13,11 +14,12 @@ const Feed = () => {
 
 
   const fetchPosts = async () => {
+    const token = await getToken()
     try {
       setLoading(true)
       const {data} = await api.get('/api/post/feed', {
         headers: {
-          Authorization: `Bearer ${await getToken}`
+          Authorization: `Bearer ${token}`
         }
       })
       if(data.success){

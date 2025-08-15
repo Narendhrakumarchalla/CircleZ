@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { dummyConnectionsData } from '../assets/assets'
 import { Eye, MessageSquare } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Messages = () => {
+
+  const {connections} = useSelector((state)=> state.connections)
   const navigate = useNavigate()
   return (
     <div className='min-h-screen relative bg-slate-50'>
@@ -14,20 +16,22 @@ const Messages = () => {
         </div>
 
         <div className='flex flex-col gap-4'>
-          {dummyConnectionsData.map((user) => (
+          {connections.map((user) => (
             <div
               key={user._id}
-              className='max-w-xl flex items-center gap-4 p-4 bg-white shadow-md rounded-lg'
+              className='max-w-xl flex items-center gap-4 p-4 justify-between bg-white shadow-md rounded-lg'
             >
-              <img
-                src={user.profile_picture}
-                alt={`${user.full_name}'s profile`}
-                className='w-12 h-12 rounded-full'
-              />
-              <div>
-                <p className='font-semibold text-slate-800'>{user.full_name}</p>
-                <p className='text-sm text-slate-500'>@{user.username}</p>
-                <p className='text-sm text-slate-600'>{user.bio}</p>
+              <div className='flex gap-4 items-center'>
+                <img
+                  src={user.profile_picture}
+                  alt={`${user.full_name}'s profile`}
+                  className='w-12 h-12 rounded-full'
+                />
+                <div>
+                  <p className='font-semibold text-slate-800'>{user.full_name}</p>
+                  <p className='text-sm text-slate-500'>@{user.username}</p>
+                  <p className='text-sm text-slate-600'>{user.bio}</p>
+                </div>
               </div>
               <div className='flex flex-col gap-2 mt-4'>
                 <button 

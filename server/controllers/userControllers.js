@@ -49,6 +49,9 @@ const updateUserData = async (req, res) => {
         }
 
         !username && (username = tempUser.username);
+        !bio && (bio = tempUser.bio);
+        !location && (location = tempUser.location);
+        !full_name && (full_name = tempUser.full_name);
         
         if(tempUser.username !== username){
             const existingUser = await User.findOne({username});
@@ -104,7 +107,7 @@ const updateUserData = async (req, res) => {
             updatedData.cover_photo = url;
         }
 
-        const user = await User.findOneAndUpdate(userId, updatedData, {new : true});
+        const user = await User.findByIdAndUpdate(userId, updatedData, {new : true});
 
         res.status(200).json({
             success: true,
@@ -229,7 +232,8 @@ const requestConnection = async (req, res) => {
     try {
         const {userId} = req.auth();
         const {id} = req.body;
-
+        console.log(userId === id);
+        
         if(userId === id){
             return res.status(400).json({
                 success: false,
@@ -243,13 +247,15 @@ const requestConnection = async (req, res) => {
             to_user_id: id,
             createdAt: { $gt: last24hours }
         });
+        console.log(userId === id);
 
         if( existingConnection.length > 0){
-            return res.status(400).json({
+            return res.json({
                 success: false,
                 message: "You have already sent a connection request to this user within the last 24 hours"
             })
         }
+        console.log(userId === id);
 
         const connection = await Connection.findOne({
             from_user_id: userId,
@@ -280,7 +286,7 @@ const requestConnection = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        res.status(409).json({
             success: false,
             message: "Connection request already exists(Pending)",
         })
@@ -298,15 +304,15 @@ const requestConnection = async (req, res) => {
 const getUserConnections = async (req, res) => {
     try {
         const {userId} = req.auth();
-        const {id} = req.body;
-
         const user = await User.findById(userId).populate('connections followers following');
         
         const connections = user.connections
         const followers = user.followers;
         const following = user.following;
 
-        const pendingConnections = (await Connection.find({to_user_id: userId, status: 'pending'})).map(conn => conn.from_user_id);
+        const pendingConnections = await Connection.find({to_user_id: userId, status: 'pending'})
+            .populate('from_user_id')
+            .then(connections => connections.map(conn => conn.from_user_id));
 
         res.status(200).json({
             success:true,
@@ -332,8 +338,8 @@ const acceptConnection = async (req, res) => {
         const {id} = req.body;
 
         const connection = await Connection.findOne({
-            from_user_id: userId,
-            to_user_id: id
+            from_user_id: id,
+            to_user_id: userId
         });
 
         if(!connection){
