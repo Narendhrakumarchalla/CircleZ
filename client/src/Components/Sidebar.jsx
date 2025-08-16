@@ -10,6 +10,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
     const user = useSelector((state)=> state.user.value);
     const navigate = useNavigate();
     const {signOut} = useClerk();
+    
   return (
     <div className={`fixed w-60 sm:relative xl:w-72  h-full flex bg-white border-r border-gray-200 flex-col items-center justify-between max-sm:absolute top-0 bottom-0 z-20 ${sidebarOpen ? 'translate-x-0' : 'max-sm:-translate-x-full'} transition-all duration-300 ease-in-out`}>
         <div className='w-full'>
