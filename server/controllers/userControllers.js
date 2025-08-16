@@ -40,6 +40,9 @@ const updateUserData = async (req, res) => {
         const {userId} = req.auth();
         let {username, bio, location, full_name} = req.body;
 
+        console.log("Body:", req.body);
+        console.log("Files:", req.files);
+
         const tempUser = await User.findById(userId);
         if(!tempUser){
             return res.status(404).json({
@@ -60,7 +63,7 @@ const updateUserData = async (req, res) => {
             }
         }
 
-        const updatedData = {
+        let updatedData = {
             username,
             bio,
             location,
@@ -109,6 +112,8 @@ const updateUserData = async (req, res) => {
 
         const user = await User.findByIdAndUpdate(userId, updatedData, {new : true});
 
+        console.log(user);
+        
         res.status(200).json({
             success: true,
             message: "User updated successfully",

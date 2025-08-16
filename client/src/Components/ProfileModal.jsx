@@ -38,7 +38,7 @@ const ProfileModal = ({setShowEdit}) => {
 
             const token = await getToken()
             dispatch(updateUser({userData, token}))
-            navigate('/profile')
+            navigate(-1);
         } catch (error) {
             toast.error(error.message)
         }
